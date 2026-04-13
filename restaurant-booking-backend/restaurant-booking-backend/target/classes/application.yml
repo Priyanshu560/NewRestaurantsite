@@ -1,0 +1,79 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: restaurant-booking
+
+  # ── MySQL ──────────────────────────────────────────────────────────────────
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:restaurant_db}?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:Priyanshu}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+
+  # ── JPA ───────────────────────────────────────────────────────────────────
+  jpa:
+    hibernate:
+      ddl-auto: update          # use Flyway/Liquibase in prod; update for local dev
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
+  # ── Cache ─────────────────────────────────────────────────────────────────
+  cache:
+    type: simple
+
+  # ── Mail ──────────────────────────────────────────────────────────────────
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:noreply@restaurant.com}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# ── JWT ───────────────────────────────────────────────────────────────────
+app:
+  jwt:
+    secret: ${JWT_SECRET:c2VjcmV0S2V5Rm9yUmVzdGF1cmFudEJvb2tpbmdTeXN0ZW0yMDI0U3VwZXJTZWN1cmVLZXk=}
+    expiration: ${JWT_EXPIRATION:86400000}       # 24 h
+    refresh-expiration: ${JWT_REFRESH_EXP:604800000}  # 7 d
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3000,http://localhost:5173}
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+
+# ── Swagger ───────────────────────────────────────────────────────────────
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+  info:
+    title: Restaurant Booking API
+    version: 1.0.0
+    description: Production-ready Restaurant Booking REST API
+
+# ── Logging ───────────────────────────────────────────────────────────────
+logging:
+  level:
+    com.restaurant: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

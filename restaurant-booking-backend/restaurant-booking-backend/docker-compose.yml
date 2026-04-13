@@ -1,0 +1,86 @@
+version: "3.9"
+
+services:
+
+  # ── MySQL ────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: restaurant_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: restaurant_db
+      MYSQL_USER: ${DB_USER:-restaurant_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-restaurant_pass}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - restaurant_net
+
+  # ── Redis ────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: restaurant_redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redispass}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - restaurant_net
+
+  # ── Backend ──────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: restaurant_backend
+    restart: unless-stopped
+    environment:
+      DB_HOST:         mysql
+      DB_PORT:         3306
+      DB_NAME:         restaurant_db
+      DB_USER:         ${DB_USER:-restaurant_user}
+      DB_PASSWORD:     ${DB_PASSWORD:-restaurant_pass}
+      REDIS_HOST:      redis
+      REDIS_PORT:      6379
+      REDIS_PASSWORD:  ${REDIS_PASSWORD:-redispass}
+      JWT_SECRET:      ${JWT_SECRET:-c2VjcmV0S2V5Rm9yUmVzdGF1cmFudEJvb2tpbmdTeXN0ZW0yMDI0U3VwZXJTZWN1cmVLZXk=}
+      JWT_EXPIRATION:  86400000
+      MAIL_HOST:       ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT:       ${MAIL_PORT:-587}
+      MAIL_USERNAME:   ${MAIL_USERNAME:-noreply@example.com}
+      MAIL_PASSWORD:   ${MAIL_PASSWORD:-}
+      FRONTEND_URL:    ${FRONTEND_URL:-http://localhost:3000}
+      CORS_ORIGINS:    ${CORS_ORIGINS:-http://localhost:3000}
+    ports:
+      - "8081:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - restaurant_net
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  restaurant_net:
+    driver: bridge
