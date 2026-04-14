@@ -14,8 +14,9 @@
 
     <groupId>com.restaurant</groupId>
     <artifactId>restaurant-booking</artifactId>
-    <version>1.0.0</version>
-    <name>Restaurant Booking System</name>
+<version>1.0.0</version>
+<packaging>jar</packaging>   <!-- 👈 YE ADD KAR -->
+<name>Restaurant Booking System</name>
     <description>Production-ready Restaurant Booking System with JWT Security</description>
 
     <properties>
