@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
   servlet:
     context-path: /api
 
@@ -7,7 +7,6 @@ spring:
   application:
     name: restaurant-booking
 
-  # ── MySQL ──────────────────────────────────────────────────────────────────
   datasource:
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:restaurant_db}?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${DB_USER:root}
@@ -18,10 +17,9 @@ spring:
       minimum-idle: 5
       connection-timeout: 30000
 
-  # ── JPA ───────────────────────────────────────────────────────────────────
   jpa:
     hibernate:
-      ddl-auto: update          # use Flyway/Liquibase in prod; update for local dev
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
@@ -30,11 +28,9 @@ spring:
         jdbc:
           time_zone: UTC
 
-  # ── Cache ─────────────────────────────────────────────────────────────────
   cache:
     type: simple
 
-  # ── Mail ──────────────────────────────────────────────────────────────────
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
@@ -47,17 +43,17 @@ spring:
           starttls:
             enable: true
 
-# ── JWT ───────────────────────────────────────────────────────────────────
 app:
   jwt:
     secret: ${JWT_SECRET:c2VjcmV0S2V5Rm9yUmVzdGF1cmFudEJvb2tpbmdTeXN0ZW0yMDI0U3VwZXJTZWN1cmVLZXk=}
-    expiration: ${JWT_EXPIRATION:86400000}       # 24 h
-    refresh-expiration: ${JWT_REFRESH_EXP:604800000}  # 7 d
+    expiration: ${JWT_EXPIRATION:86400000}
+    refresh-expiration: ${JWT_REFRESH_EXP:604800000}
+
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:3000,http://localhost:5173}
+
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
 
-# ── Swagger ───────────────────────────────────────────────────────────────
 springdoc:
   api-docs:
     path: /v3/api-docs
@@ -69,7 +65,6 @@ springdoc:
     version: 1.0.0
     description: Production-ready Restaurant Booking REST API
 
-# ── Logging ───────────────────────────────────────────────────────────────
 logging:
   level:
     com.restaurant: DEBUG
