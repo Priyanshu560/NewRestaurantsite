@@ -6,7 +6,7 @@ COPY pom.xml .
 RUN mvn -B dependency:go-offline
 
 COPY src ./src
-RUN mvn -B package -DskipTests
+RUN mvn -B clean package -DskipTests
 
 # ── Stage 2: Run ───────────────────────────────
 FROM eclipse-temurin:17-jre-alpine
@@ -15,11 +15,12 @@ WORKDIR /app
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 
-# 🔥 FIX: exact jar copy (no wildcard issue)
+# 🔥 Copy jar (safe method - handles version changes too)
 COPY --from=builder /app/target/*.jar app.jar
 
 EXPOSE 8080
 
-ENV JAVA_OPTS="-Xms256m -Xmx512m"
+# 🔥 Ensure Railway port works
+ENV PORT=8080
 
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${PORT}"]
